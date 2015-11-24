@@ -259,13 +259,8 @@ void HTMLGen::startDoc(PDFDoc *docA) {
   splashOut->startDoc(doc->getXRef());
 }
 
-static inline int pr(int (*writeFunc)(void *stream, const char *data, int size),
-		     void *stream, const char *data) {
-  return writeFunc(stream, data, (int)strlen(data));
-}
 
-static int pf(int (*writeFunc)(void *stream, const char *data, int size),
-	      void *stream, const char *fmt, ...) {
+static int pf(const char *fmt, ...) {
   va_list args;
   GString *s;
   int ret;
@@ -273,10 +268,9 @@ static int pf(int (*writeFunc)(void *stream, const char *data, int size),
   va_start(args, fmt);
   s = GString::formatv(fmt, args);
   va_end(args);
-  ret = writeFunc(stream, s->getCString(), s->getLength());
   std::cout << s->getCString();
   delete s;
-  return ret;
+  return true;
 }
 
 struct PNGWriteInfo {
@@ -288,15 +282,10 @@ static void pngWriteFunc(png_structp png, png_bytep data, png_size_t size) {
   PNGWriteInfo *info;
 
   info = (PNGWriteInfo *)png_get_progressive_ptr(png);
-  info->writePNG(info->pngStream, (char *)data, (int)size);
 }
 
 int HTMLGen::convertPage(
-		 int pg, const char *pngURL,
-		 int (*writeHTML)(void *stream, const char *data, int size),
-		 void *htmlStream,
-		 int (*writePNG)(void *stream, const char *data, int size),
-		 void *pngStream) {
+		 int pg, const char *pngURL) {
   png_structp png;
   png_infop pngInfo;
   PNGWriteInfo writeInfo;
@@ -333,8 +322,6 @@ int HTMLGen::convertPage(
   if (setjmp(png_jmpbuf(png))) {
     return errFileIO;
   }
-  writeInfo.writePNG = writePNG;
-  writeInfo.pngStream = pngStream;
   png_set_write_fn(png, &writeInfo, pngWriteFunc, NULL);
   png_set_IHDR(png, pngInfo, bitmap->getWidth(), bitmap->getHeight(),
 	       8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
@@ -358,24 +345,14 @@ int HTMLGen::convertPage(
   text = textOut->takeText();
 
   // HTML header
-  pr(writeHTML, htmlStream, "<html>\n");
-  pr(writeHTML, htmlStream, "<head>\n");
-  pr(writeHTML, htmlStream, "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n");
-  pr(writeHTML, htmlStream, "<style type=\"text/css\">\n");
-  pr(writeHTML, htmlStream, ".txt { white-space:nowrap; }\n");
   fonts = text->getFonts();
   fontScales = (double *)gmallocn(fonts->getLength(), sizeof(double));
   for (i = 0; i < fonts->getLength(); ++i) {
     font = (TextFontInfo *)fonts->get(i);
     s = getFontDefn(font, &fontScales[i]);
-    pf(writeHTML, htmlStream, "#f{0:d} {{ {1:t} }}\n", i, s);
+
     delete s;
   }
-  pr(writeHTML, htmlStream, "</style>\n");
-  pr(writeHTML, htmlStream, "</head>\n");
-  pr(writeHTML, htmlStream, "<body onload=\"start()\">\n");
-  pf(writeHTML, htmlStream, "<img id=\"background\" style=\"position:absolute; left:0px; top:0px;\" width=\"{0:d}\" height=\"{1:d}\" src=\"{2:s}\">\n",
-	 (int)pageW, (int)pageH, pngURL);
 
   // generate the HTML text
   cols = text->makeColumns();
@@ -491,7 +468,7 @@ int HTMLGen::convertPage(
 	}
 	s->append("</span>");
 
-	pf(writeHTML, htmlStream, "<div class=\"txt\" style=\"position:absolute; left:{0:d}px; top:{1:d}px;\">{2:t}</div>\n",
+	pf("<div class=\"txt\" style=\"position:absolute; left:{0:d}px; top:{1:d}px;\">{2:t}</div>\n",
 	   (int)line->getXMin(), (int)line->getYMin(), s);
 	delete s;
       }
@@ -500,10 +477,6 @@ int HTMLGen::convertPage(
   gfree(fontScales);
   delete text;
   deleteGList(cols, TextColumn);
-
-  // HTML trailer
-  pr(writeHTML, htmlStream, "</body>\n");
-  pr(writeHTML, htmlStream, "</html>\n");
 
   return errNone;
 }

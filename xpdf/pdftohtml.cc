@@ -146,13 +146,6 @@ int main(int argc, char *argv[]) {
     lastPage = doc->getNumPages();
   }
 
-  // create HTML directory
-  if (!createDir(htmlDir, 0755)) {
-    error(errIO, -1, "Couldn't create HTML output directory '{0:s}'",
-	  htmlDir);
-    exitCode = 2;
-    goto err1;
-  }
 
   // set up the HTMLGen object
   htmlGen = new HTMLGen(resolution);
@@ -167,26 +160,11 @@ int main(int argc, char *argv[]) {
   for (pg = firstPage; pg <= lastPage; ++pg) {
     htmlFileName = GString::format("{0:s}/page{1:d}.html", htmlDir, pg);
     pngFileName = GString::format("{0:s}/page{1:d}.png", htmlDir, pg);
-    if (!(htmlFile = fopen(htmlFileName->getCString(), "wb"))) {
-      error(errIO, -1, "Couldn't open HTML file '{0:t}'", htmlFileName);
-      delete htmlFileName;
-      delete pngFileName;
-      goto err2;
-    }
-    if (!(pngFile = fopen(pngFileName->getCString(), "wb"))) {
-      error(errIO, -1, "Couldn't open PNG file '{0:t}'", pngFileName);
-      fclose(htmlFile);
-      delete htmlFileName;
-      delete pngFileName;
-      goto err2;
-    }
+
     pngURL = GString::format("page{0:d}.png", pg);
-    err = htmlGen->convertPage(pg, pngURL->getCString(),
-			       &writeToFile, htmlFile,
-			       &writeToFile, pngFile);
+    err = htmlGen->convertPage(pg, pngURL->getCString());
     delete pngURL;
-    fclose(htmlFile);
-    fclose(pngFile);
+
     delete htmlFileName;
     delete pngFileName;
     if (err != errNone) {
@@ -196,11 +174,6 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // create the master index
-  if (!createIndex(htmlDir)) {
-    exitCode = 2;
-    goto err2;
-  }
 
   exitCode = 0;
 

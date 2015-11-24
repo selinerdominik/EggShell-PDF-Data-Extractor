@@ -40,11 +40,7 @@ public:
     { drawInvisibleText = drawInvisibleTextA; }
 
   void startDoc(PDFDoc *docA);
-  int convertPage(int pg, const char *pngURL,
-		  int (*writeHTML)(void *stream, const char *data, int size),
-		  void *htmlStream,
-		  int (*writePNG)(void *stream, const char *data, int size),
-		  void *pngStream);
+  int convertPage(int pg, const char *pngURL);
 
 private:
 
