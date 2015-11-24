@@ -26,6 +26,7 @@
 #pragma implementation
 #endif
 
+#include <iostream>
 #include <stdlib.h>
 #include <png.h>
 #include "gmem.h"
@@ -273,6 +274,7 @@ static int pf(int (*writeFunc)(void *stream, const char *data, int size),
   s = GString::formatv(fmt, args);
   va_end(args);
   ret = writeFunc(stream, s->getCString(), s->getLength());
+  std::cout << s->getCString();
   delete s;
   return ret;
 }
@@ -421,12 +423,18 @@ int HTMLGen::convertPage(
 		break;
 	      }
 	    }
-	    s->appendf("<span id=\"f{0:d}\" style=\"font-size:{1:d}px;vertical-align:{2:s};color:#{3:02x}{4:02x}{5:02x};\">",
+
+	    TextFontInfo* domifont;
+	    domifont = (TextFontInfo *)fonts->get(i);
+	    GString* domis;
+	    domis = getFontDefn(domifont, &fontScales[i]);
+
+	    s->appendf("<span id=\"f{0:d}\" style=\"font-size:{1:d}px;vertical-align:{2:s};color:#{3:02x}{4:02x}{5:02x};{6:t}\">",
 		       i, (int)(fontScales[i] * word1->getFontSize()),
 		       subSuper1 < 0 ? "super"
 		                     : subSuper1 > 0 ? "sub"
 		                                     : "baseline",
-		       (int)(r1 * 255), (int)(g1 * 255), (int)(b1 * 255));
+		       (int)(r1 * 255), (int)(g1 * 255), (int)(b1 * 255),domis);
 	  }
 	  for (i = 0; i < word1->getLength(); ++i) {
 	    u = word1->getChar(i);
@@ -482,6 +490,7 @@ int HTMLGen::convertPage(
 	  b0 = b1;
 	}
 	s->append("</span>");
+
 	pf(writeHTML, htmlStream, "<div class=\"txt\" style=\"position:absolute; left:{0:d}px; top:{1:d}px;\">{2:t}</div>\n",
 	   (int)line->getXMin(), (int)line->getYMin(), s);
 	delete s;
