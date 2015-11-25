@@ -355,6 +355,8 @@ int HTMLGen::convertPage(
   }
 
   // generate the HTML text
+  pf("<page>\n");
+
   cols = text->makeColumns();
   for (colIdx = 0; colIdx < cols->getLength(); ++colIdx) {
     col = (TextColumn *)cols->get(colIdx);
@@ -373,6 +375,7 @@ int HTMLGen::convertPage(
 	word0 = NULL;
 	subSuper0 = 0; // make gcc happy
 	r0 = g0 = b0 = 0; // make gcc happy
+
 	for (wordIdx = 0; wordIdx < words->getLength(); ++wordIdx) {
 	  word1 = (TextWord *)words->get(wordIdx);
 	  if (!drawInvisibleText && word1->isInvisible()) {
@@ -406,7 +409,7 @@ int HTMLGen::convertPage(
 	    GString* domis;
 	    domis = getFontDefn(domifont, &fontScales[i]);
 
-	    s->appendf("<span id=\"f{0:d}\" style=\"font-size:{1:d}px;vertical-align:{2:s};color:#{3:02x}{4:02x}{5:02x};{6:t}\">",
+	    s->appendf("<span id=\"f{0:d}\" font-size=\"{1:d}\" vertical-align=\"{2:s}\" color=\"#{3:02x}{4:02x}{5:02x}\" {6:t}>",
 		       i, (int)(fontScales[i] * word1->getFontSize()),
 		       subSuper1 < 0 ? "super"
 		                     : subSuper1 > 0 ? "sub"
@@ -468,12 +471,13 @@ int HTMLGen::convertPage(
 	}
 	s->append("</span>");
 
-	pf("<div class=\"txt\" style=\"position:absolute; left:{0:d}px; top:{1:d}px;\">{2:t}</div>\n",
+	pf("<block left=\"{0:d}\" top=\"{1:d}\">{2:t}</block>\n",
 	   (int)line->getXMin(), (int)line->getYMin(), s);
 	delete s;
       }
     }
   }
+  pf("</page>");
   gfree(fontScales);
   delete text;
   deleteGList(cols, TextColumn);
@@ -556,7 +560,7 @@ GString *HTMLGen::getFontDefn(TextFontInfo *font, double *scale) {
   }
 
   // generate the CSS markup
-  return GString::format("font-family:{0:s}; font-weight:{1:s}; font-style:{2:s};",
+  return GString::format("font-family=\"{0:s}\" font-weight=\"{1:s}\" font-style=\"{2:s}\"",
 			 fixedWidth ? "monospace"
 			            : serif ? "serif"
 			                    : "sans-serif",
