@@ -3,3 +3,4 @@
 .idea/xpdf-3.04 (clion).iml
 xpdf/.DS_Store
 .idea/vcs.xml
+*.o

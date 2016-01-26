@@ -471,8 +471,8 @@ int HTMLGen::convertPage(
 	}
 	s->append("</span>");
 
-	pf("<block left=\"{0:d}\" top=\"{1:d}\">{2:t}</block>\n",
-	   (int)line->getXMin(), (int)line->getYMin(), s);
+	pf("<block left=\"{0:d}\" right=\"{1:d}\" top=\"{2:d}\" bottom=\"{3:d}\">{4:t}</block>\n",
+	   (int)line->getXMin(), (int)line->getXMax(), (int)line->getYMin(), (int)line->getYMax(), s);
 	delete s;
       }
     }

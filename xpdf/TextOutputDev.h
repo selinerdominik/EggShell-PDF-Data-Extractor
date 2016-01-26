@@ -185,6 +185,8 @@ public:
 
   double getXMin() { return xMin; }
   double getYMin() { return yMin; }
+	double getXMax() { return xMax; }
+	double getYMax() { return yMax; }
   double getBaseline();
   int getRotation() { return rot; }
   GList *getWords() { return words; }
