@@ -19,11 +19,11 @@ FOFILIBDIR = ../fofi
 SPLASHSRCDIR = $(srcdir)/../splash
 SPLASHLIBDIR = ../splash
 
-CXXFLAGS = -g -O2 -DHAVE_CONFIG_H -I.. -I$(srcdir)/.. -I$(GOOSRCDIR) -I$(FOFISRCDIR) -I$(SPLASHSRCDIR) -I$(srcdir)           
+CXXFLAGS = -g -O2 -DHAVE_CONFIG_H -I.. -I$(srcdir)/.. -I$(GOOSRCDIR) -I$(FOFISRCDIR) -I$(SPLASHSRCDIR) -I$(srcdir) -I/usr//local/include/freetype2          
 
 LDFLAGS = 
 
-FTLIBS =  -lz
+FTLIBS = -L/usr//local/Library/LinkedKegs/freetype -lfreetype -lz
 
 XLIBS =         -lX11 
 
@@ -106,7 +106,7 @@ CXX_SRC = \
 	$(srcdir)/Zoox.cc \
 	$(srcdir)/pdftops.cc \
 	$(srcdir)/pdftotext.cc \
-	$(srcdir)/pdftohtml.cc \
+	$(srcdir)/pdftoxml.cc \
 	$(srcdir)/pdfinfo.cc \
 	$(srcdir)/pdffonts.cc \
 	$(srcdir)/pdfdetach.cc \
@@ -117,11 +117,11 @@ CXX_SRC = \
 
 #------------------------------------------------------------------------
 
-all: xpdf$(EXE) pdftops$(EXE) pdftotext$(EXE) pdftohtml$(EXE) \
+all: xpdf$(EXE) pdftops$(EXE) pdftotext$(EXE) pdftoxml$(EXE) \
 	pdfinfo$(EXE) pdffonts$(EXE) pdfdetach$(EXE) pdftoppm$(EXE) \
 	pdftopng$(EXE) pdfimages$(EXE)
 
-all-no-x: pdftops$(EXE) pdftotext$(EXE) pdftohtml$(EXE) pdfinfo$(EXE) \
+all-no-x: pdftops$(EXE) pdftotext$(EXE) pdftoxml$(EXE) pdfinfo$(EXE) \
 	pdffonts$(EXE) pdfdetach$(EXE) pdfimages$(EXE)
 
 #------------------------------------------------------------------------
@@ -296,7 +296,7 @@ pdftotext$(EXE): $(PDFTOTEXT_OBJS) $(GOOLIBDIR)/$(LIBPREFIX)Goo.a
 
 #------------------------------------------------------------------------
 
-PDFTOHTML_OBJS = \
+pdftoxml_OBJS = \
 	AcroForm.o \
 	Annot.o \
 	Array.o \
@@ -342,13 +342,13 @@ PDFTOHTML_OBJS = \
 	XpdfPluginAPI.o \
 	XRef.o \
 	Zoox.o \
-	pdftohtml.o
-PDFTOHTML_LIBS = -L$(GOOLIBDIR) -lGoo $(SPLASHLIBS) $(FTLIBS) \
+	pdftoxml.o
+pdftoxml_LIBS = -L$(GOOLIBDIR) -lGoo $(SPLASHLIBS) $(FTLIBS) \
 	$(OTHERLIBS) $(PNGLIBS) -lm
 
-pdftohtml$(EXE): $(PDFTOHTML_OBJS) $(GOOLIBDIR)/$(LIBPREFIX)Goo.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o pdftohtml$(EXE) $(PDFTOHTML_OBJS) \
-		$(PDFTOHTML_LIBS)
+pdftoxml$(EXE): $(pdftoxml_OBJS) $(GOOLIBDIR)/$(LIBPREFIX)Goo.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o pdftoxml$(EXE) $(pdftoxml_OBJS) \
+		$(pdftoxml_LIBS)
 
 #------------------------------------------------------------------------
 
@@ -671,7 +671,7 @@ clean:
 	rm -f $(XPDF_OBJS) xpdf$(EXE)
 	rm -f $(PDFTOPS_OBJS) pdftops$(EXE)
 	rm -f $(PDFTOTEXT_OBJS) pdftotext$(EXE)
-	rm -f $(PDFTOHTML_OBJS) pdftohtml$(EXE)
+	rm -f $(pdftoxml_OBJS) pdftoxml$(EXE)
 	rm -f $(PDFINFO_OBJS) pdfinfo$(EXE)
 	rm -f $(PDFFONTS_OBJS) pdffonts$(EXE)
 	rm -f $(PDFDETACH_OBJS) pdfdetach$(EXE)

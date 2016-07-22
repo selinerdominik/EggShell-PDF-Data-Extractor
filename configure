@@ -9381,6 +9381,6 @@ $as_echo "$as_me: WARNING: -- You will be able to compile pdftops, pdftotext,
 fi
 
 if test "x$smr_have_libpng_library" != xyes; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Couldn't find libpng -- you will not be able to build pdftohtml or pdftopng" >&5
-$as_echo "$as_me: WARNING: Couldn't find libpng -- you will not be able to build pdftohtml or pdftopng" >&2;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Couldn't find libpng -- you will not be able to build pdftoxml or pdftopng" >&5
+$as_echo "$as_me: WARNING: Couldn't find libpng -- you will not be able to build pdftoxml or pdftopng" >&2;}
 fi
